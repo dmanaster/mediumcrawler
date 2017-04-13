@@ -24,6 +24,8 @@ def crawl_site( starting_at, &each_page )
         # Pare it down to only those pages that are on the same site
         uris.select!{ |uri| uri.host == starting_uri.host }
 
+        uris.select!{ |uri| uri.path.start_with? ("/@")  }
+
         # Throw out links to files (this could be more efficient with regex)
         uris.reject!{ |uri| files.any?{ |ext| uri.path.end_with?(".#{ext}") } }
 
@@ -42,8 +44,14 @@ def crawl_site( starting_at, &each_page )
   crawl_page.call( starting_uri )   # Kick it all off!
 end
 
-crawl_site('http://phrogz.net/') do |page,uri|
+def search_page(page_uri)
+  page = Nokogiri.HTML(open(page_uri))
+  puts page_uri.path
+  puts page.css('p.hero-description')
+end
+
+crawl_site('https://medium.com/') do |page,uri|
   # page here is a Nokogiri HTML document
   # uri is a URI instance with the address of the page
-  puts uri
+  search_page(uri)
 end
